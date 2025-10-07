@@ -84,7 +84,7 @@ export class DetalharPage implements OnInit {
   }
 
   async presentAlert(subHeader: string, message: string) {
-    const alert = await this.alertController.create({
+    const alert = await this.alertController  .create({
       header: 'Agenda de Contatos',
       subHeader,
       message,
