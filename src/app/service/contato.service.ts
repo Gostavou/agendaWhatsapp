@@ -23,13 +23,14 @@ export class ContatoService {
   }
 
   public update(contato: Contato, nome: string, telefone: string,
-    genero: string, email: string): boolean{
+    genero: string, email: string, whatsapp: boolean): boolean{
       for(let i = 0; i  < this.contatos.length; i++){
         if(contato.id == this.contatos[i].id){
           this._contatos[i].nome = nome;
           this._contatos[i].telefone = telefone;
           this._contatos[i].genero = genero;
           this._contatos[i].email = email;
+          this._contatos[i].whatsapp = whatsapp;
           return true;
         }
       }

@@ -15,7 +15,7 @@
     <form [formGroup]="formCadastrar" (ngSubmit)="submitForm()" novalidate>
 
       <ion-item lines="none">
-        <ion-input placeholder="Nome" formControlName="nome"></ion-input>
+        <ion-input placeholder="Nome" formControlName="nome" ></ion-input>
       </ion-item>
 
       @if (formCadastrar.get('nome')?.touched || formCadastrar.get('nome')?.dirty) {
@@ -57,7 +57,15 @@
             </ion-note>
         }
       }
-
+      <ion-item lines="none">
+        <ion-toggle 
+          formControlName="whatsapp" 
+          labelPlacement="end"
+        >
+          Você tem Whatsapp?
+        </ion-toggle>
+      </ion-item>
+      
       <ion-item lines="none">
         <ion-select placeholder="Gênero" formControlName="genero">
           <ion-select-option value="Não Declarar"
@@ -99,6 +107,7 @@
         }
       }
 
+      
 
       </form>
   </ion-list>

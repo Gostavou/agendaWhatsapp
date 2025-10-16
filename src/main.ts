@@ -8,9 +8,6 @@ import { AppComponent } from './app/app.component';
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    provideFirebaseApp(()=> initializeApp(environment.firebaseConfig)),
-    provideFirestore(()=> getFirestore()),
-    provideAuth(()=> getAuth())
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
   ],

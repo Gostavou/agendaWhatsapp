@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController } from '@ionic/angular';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule,  } from '@angular/common';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Contato } from 'src/app/model/contato';
+import { IonicModule, AlertController } from '@ionic/angular';
 import { ContatoService } from 'src/app/service/contato.service';
 
 @Component({
@@ -11,98 +11,111 @@ import { ContatoService } from 'src/app/service/contato.service';
   templateUrl: './detalhar.page.html',
   styleUrls: ['./detalhar.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, ReactiveFormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, ReactiveFormsModule]
 })
 export class DetalharPage implements OnInit {
-  formDetalhar!: FormGroup
   contato!: Contato
-  editar = true
+  editar: boolean = true;
+  formCadastrar!: FormGroup;
+  isSubmitted = false;
 
-  constructor(
-    private router: Router,
+  constructor(private router: Router,
     private alertController: AlertController,
     private contatoService: ContatoService,
-    private formBuilder: FormBuilder
-  ) {
-    this.formDetalhar = this.formBuilder.group({
-      nome: ['', [Validators.required, Validators.minLength(8)]],
-      telefone: ['', [Validators.required, Validators.minLength(10)]],
-      genero: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-    })
-  }
+     private formBuilder: FormBuilder) {}
+
 
   ngOnInit() {
-    const nav = this.router.getCurrentNavigation()
-    if (nav?.extras?.state?.['objeto']) {
-      this.contato = nav.extras.state['objeto']
-      this.formDetalhar.patchValue({
-        nome: this.contato.nome,
-        telefone: this.contato.telefone,
-        genero: this.contato.genero,
-        email: this.contato.email
-      })
+    const nav = this.router.getCurrentNavigation();
+    if(nav?.extras?.state?.['objeto']){
+      this.contato = nav?.extras?.state?.['objeto']
+        this.formCadastrar = this.formBuilder.group({
+        nome: [this.contato.nome, [Validators.required, Validators.minLength(8)]],
+        telefone: [this.contato.telefone, [Validators.required, Validators.minLength(10)]],
+        genero: [this.contato.genero, [Validators.required]],
+        email: [this.contato.email, [Validators.required, Validators.email]],
+        whatsapp: [this.contato.whatsapp] 
+      });
     }
   }
 
-  get errorControl() {
-    return this.formDetalhar.controls
+   get errorControl(){
+    return this.formCadastrar.controls;
   }
 
-  alterarEdicao() {
-    this.editar = !this.editar
-    if (this.editar) {
-      this.formDetalhar.disable()
-    } else {
-      this.formDetalhar.enable()
+  submitForm() : boolean{
+    this.isSubmitted = true;
+    if(!this.formCadastrar.valid){
+      this.presentAlert("Erro ao Cadastrar", "Campos Obrigatórios")
+      return false;
+    }else{
+      this.salvar();
+      return true;
     }
   }
 
-  salvar() {
-    if (!this.formDetalhar.valid) {
-      this.presentAlert('Erro ao Atualizar', 'Campos Obrigatórios')
-      return
-    }
-    const { nome, telefone, genero, email } = this.formDetalhar.value
-    if (this.contatoService.update(this.contato, nome, telefone, genero, email)) {
-      this.presentAlert('Atualizar', 'Contato atualizado com sucesso')
-      this.router.navigate(['/home'])
-    } else {
-      this.presentAlert('Atualizar', 'Erro ao atualizar contato')
-    }
-  }
-
-  excluir() {
-    this.presentConfirmAlert('Excluir Contato', 'Você realmente deseja excluir contato?', () => {
-      if (this.contatoService.delete(this.contato)) {
-        this.presentAlert('Excluir', 'Exclusão efetuada com sucesso!')
+  salvar(){
+    if(this.contatoService.update(this.contato, this.formCadastrar.value['nome'],
+      this.formCadastrar.value['telefone'], this.formCadastrar.value['genero'],
+      this.formCadastrar.value['email'], this.formCadastrar.value['whatsapp'])){
+        this.presentAlert('Atualizar', 'Contato atualizado com sucesso')
         this.router.navigate(['/home'])
-      } else {
-        this.presentAlert('Erro ao Excluir', 'Contato não Encontrado')
+      }else{
+        this.presentAlert('Atualizar', 'Erro ao atualizar contato')
       }
-    })
   }
 
-  async presentAlert(subHeader: string, message: string) {
-    const alert = await this.alertController  .create({
-      header: 'Agenda de Contatos',
-      subHeader,
-      message,
-      buttons: ['ok']
-    })
-    await alert.present()
+  excluir(){
+    this.presentConfirmAlert("Excluir Contato",
+      "Você realmente deseja excluir contato?",
+      this.excluirContato()
+    )
+  }
+  async excluirContato(){
+    if(this.contatoService.delete(this.contato)){
+      this.presentAlert("Excluir", "Exclusão efetuada com sucesso!");
+      this.router.navigate(['/home'])
+    }else{
+      this.presentAlert("Erro ao Excluir", "Contato não Encontrado");
+    }
   }
 
-  async presentConfirmAlert(subHeader: string, message: string, acao: () => void) {
+  alterarEdicao(){
+    if(this.editar == false){
+      this.editar = true;
+    }else{
+      this.editar = false;
+    }
+  }
+
+   private validar(campo: any) : boolean{
+    if(!campo){
+      return false;
+    }
+    return true;
+  }
+
+
+   async presentAlert(subHeader: string, message: string) {
     const alert = await this.alertController.create({
       header: 'Agenda de Contatos',
-      subHeader,
-      message,
+      subHeader: subHeader,
+      message: message,
+      buttons: ['ok'],
+    });
+    await alert.present();
+  }
+
+    async presentConfirmAlert(subHeader: string, message: string, acao: any) {
+    const alert = await this.alertController.create({
+      header: 'Agenda de Contatos',
+      subHeader: subHeader,
+      message: message,
       buttons: [
-        { text: 'Cancelar', role: 'cancelar', cssClass: 'secondary' },
-        { text: 'Confirmar', handler: () => acao() }
-      ]
-    })
-    await alert.present()
+        {text: 'Cancelar', role: 'cancelar', cssClass: 'secondary', handler:()=>{}},
+        {text: 'Confirmar', handler:(acao)=>{acao}}
+      ],
+    });
+    await alert.present();
   }
 }

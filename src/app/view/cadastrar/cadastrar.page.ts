@@ -16,8 +16,6 @@ import { Contato } from 'src/app/model/contato';
 export class CadastrarPage implements OnInit {
   formCadastrar!: FormGroup;
   isSubmitted = false;
-  maxDate: string;
-
 
   constructor(private alertController: AlertController,
     private router: Router,
@@ -28,9 +26,8 @@ export class CadastrarPage implements OnInit {
         telefone: ['', [Validators.required, Validators.minLength(10)]],
         genero: ['', [Validators.required]],
         email: ['', [Validators.required, Validators.email]],
+        whatsapp: [false] 
       });
-      let hoje = new Date();
-      this.maxDate = hoje.toISOString().split('T')[0];
     }
 
   ngOnInit() {
@@ -51,14 +48,16 @@ export class CadastrarPage implements OnInit {
     }
   }
 
-  _cadastrar(){
+  async _cadastrar(){
     let contato: Contato = new Contato(this.formCadastrar.value['nome'],
       this.formCadastrar.value['telefone']);
       contato.email = this.formCadastrar.value['email'];
       contato.genero = this.formCadastrar.value['genero'];
+      contato.whatsapp = this.formCadastrar.value['whatsapp']; 
      this.contatoService.create(contato)
      this.presentAlert("Sucesso", "Contato Cadastrado")
      this.router.navigate(["/home"])
+     
   }
 
    async presentAlert(subHeader: string, message: string) {
@@ -70,5 +69,4 @@ export class CadastrarPage implements OnInit {
     });
     await alert.present();
   }
-
 }
